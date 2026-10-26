@@ -9,6 +9,7 @@ import { useProgress } from '../state/store';
 import { Avatar } from '../ui/Avatar';
 import { Mascot } from '../ui/Mascot';
 import { HintText, SpeakButton } from '../ui/bits';
+import { personal } from '../ui/personal';
 import { Mic, Play, Star, Stop } from '../ui/icons';
 
 export interface CheckResult {
@@ -67,6 +68,9 @@ function NewBadge() {
   return (
     <div className="new-badge">
       <Star size={16} /> {t('newWord')}
+      <span className="muted" style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 700 }}>
+        · {t('tapWordHint')}
+      </span>
     </div>
   );
 }
@@ -416,7 +420,7 @@ function ChatEx({ ex, checked, setCheck }: ExProps) {
   const pick = (i: number) => {
     sfx.tap();
     setSel(i);
-    void speak(replies[i].bn, 'f');
+    void speak(personal(replies[i].bn), 'f');
     setCheck(() => ({ verdict: replies[i].ok ? 'right' : 'wrong' }));
   };
   return (
@@ -445,7 +449,7 @@ function ChatEx({ ex, checked, setCheck }: ExProps) {
             onClick={() => pick(i)}
           >
             <span className="num">{i + 1}</span>
-            <span className="grow">{r.bn}</span>
+            <span className="grow">{personal(r.bn)}</span>
           </button>
         ))}
       </div>

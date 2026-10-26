@@ -2,13 +2,16 @@
 import { LEVELS } from '../content/course';
 import type { Chat, Gloss, LevelDef, Sentence, Tr, UnitDef, Voice, Word } from '../content/types';
 import { CHARACTERS } from '../content/characters';
-import { clean } from './text';
+import { alts, clean, first } from './text';
 
 export type NodeKind = 'lesson' | 'listen' | 'chat' | 'story' | 'practice' | 'chest' | 'test' | 'exam';
 
 export interface Item extends Tr {
   key: string;
+  /** Canonical Banglish (shown and spoken). */
   bn: string;
+  /** Every accepted Banglish answer (canonical first). */
+  alts: string[];
   voice: Voice;
   kind: 'word' | 'sentence';
   emoji?: string;
@@ -103,11 +106,12 @@ function build() {
       };
 
       const addItem = (it: Word | Sentence, kind: 'word' | 'sentence', at: number) => {
-        const key = clean(it.bn);
+        const key = clean(first(it.bn));
         if (items.has(key)) return items.get(key)!;
         const item: Item = {
           key,
-          bn: it.bn,
+          bn: first(it.bn),
+          alts: alts(it.bn),
           en: it.en,
           id: it.id,
           voice: kind === 'sentence' ? voiceFor(it as Sentence) : 'f',
@@ -167,7 +171,7 @@ export function unitItems(unit: UnitInfo): Item[] {
 
 export function lessonItems(node: PathNode): { words: Item[]; sentences: Item[] } {
   const def = node.unit.def.lessons[node.lesson ?? 0];
-  const get = (bn: string) => COURSE.items.get(clean(bn))!;
+  const get = (bn: string) => COURSE.items.get(clean(first(bn)))!;
   return { words: def.words.map((w) => get(w.bn)), sentences: def.sentences.map((s) => get(s.bn)) };
 }
 

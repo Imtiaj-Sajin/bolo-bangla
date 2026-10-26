@@ -1,11 +1,14 @@
 // Text helpers shared by the lesson engine, the hint system and the audio tools.
 
-const PUNCT = /[.,!?;:"“”‘’()¿¡…–—]/g;
+const PUNCT = /[.,!?;:"“”()¿¡…–—]/g;
+/** Curly apostrophes become straight ones so "Rafi’s" stays one word. */
+const APOS = /[‘’]/g;
 
 /** Lowercase, drop punctuation, collapse spaces. Apostrophes inside words are kept. */
 export function clean(s: string): string {
   return s
     .toLowerCase()
+    .replace(APOS, "'")
     .replace(PUNCT, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -14,6 +17,7 @@ export function clean(s: string): string {
 /** Split a sentence into display tokens (punctuation stripped, original case kept). */
 export function tokens(s: string): string[] {
   return s
+    .replace(APOS, "'")
     .replace(PUNCT, ' ')
     .split(/\s+/)
     .filter(Boolean);

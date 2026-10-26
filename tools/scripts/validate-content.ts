@@ -1,7 +1,7 @@
 // Content checks run before every build. Errors fail the build; warnings are printed.
 import { LEVELS } from '../../src/content/course';
 import { COURSE, segment } from '../../src/engine/course';
-import { alts, clean } from '../../src/engine/text';
+import { alts, clean, first } from '../../src/engine/text';
 
 const errors: string[] = [];
 const warnings: string[] = [];
@@ -12,7 +12,7 @@ const unglossed = new Map<string, string>();
 const checkGloss = (bn: string, where: string) => {
   for (const seg of segment(bn)) {
     const word = clean(seg.text);
-    if (!seg.gloss && word && !unglossed.has(word)) unglossed.set(word, where);
+    if (!seg.gloss && word && !word.startsWith('{') && !unglossed.has(word)) unglossed.set(word, where);
   }
 };
 
@@ -40,7 +40,9 @@ for (const level of LEVELS) {
       }
       for (const s of lesson.sentences) {
         checkTr(s, `${at} sentence "${s.bn}"`);
-        checkGloss(s.bn, at);
+        if (wordHome.has(clean(first(s.bn)))) err(`${at}: sentence "${s.bn}" is identical to a word — make it a real sentence`);
+        if (s.bn.includes('{')) err(`${at}: "{name}" is only allowed in chat replies and story lines`);
+        for (const a of alts(s.bn)) checkGloss(a, at);
         if (!/[.?!]$/.test(s.bn)) warn(`${at}: sentence without end punctuation "${s.bn}"`);
       }
       for (const c of lesson.chats ?? []) {

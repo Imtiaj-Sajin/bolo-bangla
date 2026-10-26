@@ -1,8 +1,8 @@
 """Generate Bangla audio clips for the app.
 
 The app never contains Bengali script. Text-to-speech engines can only read Bangla
-from Bengali script, so the spellings live here, in tools/audio/bn-script.json
-(Banglish phrase -> Bengali script), and are used only as engine input.
+from Bengali script, so the spellings live here, in tools/audio/bn/*.json
+(Banglish phrase -> Bengali script, one file per unit), and are used only as engine input.
 
 Usage:  npm run audio:make        (exports the clip list, then runs this script)
 Needs:  pip install edge-tts
@@ -45,7 +45,9 @@ async def synth(text: str, voice: str, path: Path) -> None:
 
 async def main() -> None:
     needed = json.loads((ROOT / "tools" / "audio" / "needed.json").read_text(encoding="utf-8"))
-    mapping = json.loads((ROOT / "tools" / "audio" / "bn-script.json").read_text(encoding="utf-8"))
+    mapping: dict[str, str] = {}
+    for f in sorted((ROOT / "tools" / "audio" / "bn").glob("*.json")):
+        mapping.update(json.loads(f.read_text(encoding="utf-8")))
     OUT.mkdir(parents=True, exist_ok=True)
     made = skipped = 0
     for item in needed:

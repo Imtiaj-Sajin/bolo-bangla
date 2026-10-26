@@ -17,6 +17,8 @@ export interface Speakable {
 export function speakables(): Speakable[] {
   const out = new Map<string, Speakable>();
   const add = (text: string, voice: Voice, en: string) => {
+    // Lines with the learner's own name can't be pre-recorded.
+    if (text.includes('{')) return;
     const t = speechText(text);
     const key = audioKey(t, voice);
     if (!out.has(key)) out.set(key, { key, voice, text: t, id: clean(t), en: first(en) });

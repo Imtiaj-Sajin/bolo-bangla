@@ -11,6 +11,7 @@ import { Avatar } from '../ui/Avatar';
 import { Bar, HintText, Modal, SpeakButton } from '../ui/bits';
 import { Close } from '../ui/icons';
 import { Mascot } from '../ui/Mascot';
+import { personal } from '../ui/personal';
 import { ResultScreens } from './Result';
 
 export function StoryPlayer({ nodeId, nav, guard }: { nodeId: string; nav: Nav; guard: MutableRefObject<(() => boolean) | null> }) {
@@ -99,9 +100,9 @@ export function StoryPlayer({ nodeId, nav, guard }: { nodeId: string; nav: Nav; 
                 <div className="bubble">
                   <div className="row" style={{ alignItems: 'flex-start' }}>
                     <SpeakButton text={s.line.bn} voice={CHARACTERS[s.line.who].voice} size="small" />
-                    <HintText bn={s.line.bn} />
+                    <HintText bn={personal(s.line.bn)} />
                   </div>
-                  {showTr && <div className="tr">{s.line[lang].split('|')[0]}</div>}
+                  {showTr && <div className="tr">{personal(s.line[lang].split('|')[0])}</div>}
                 </div>
               </div>
             </div>

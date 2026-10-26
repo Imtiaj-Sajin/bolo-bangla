@@ -9,6 +9,7 @@ import { currentIndex, finishSession, getProgress, useProgress, type Reward } fr
 import { Bar, Modal } from '../ui/bits';
 import { Check, Close, Heart } from '../ui/icons';
 import { Mascot } from '../ui/Mascot';
+import { personal } from '../ui/personal';
 import { ExerciseView, type CheckResult } from './ExerciseView';
 import { ResultScreens } from './Result';
 
@@ -111,12 +112,14 @@ export function Session({ spec, nav, guard }: { spec: SessionSpec; nav: Nav; gua
     if (!slot) return;
     const ok = res.verdict !== 'wrong';
     const ex = slot.ex;
-    for (const k of ex.keys) items.current[k] = (items.current[k] ?? true) && ok;
+    // A first guess at a brand-new word is part of meeting it, so it never counts against her.
+    const graded = ok || !ex.isNew;
+    if (graded) for (const k of ex.keys) items.current[k] = (items.current[k] ?? true) && ok;
     if (LISTEN_KINDS.includes(ex.kind) || (ex.kind === 'pickMeaning' && ex.prompt === 'audio')) counts.current.listened++;
     if (ex.kind === 'speak') counts.current.spoken++;
 
     const nextFirst = new Map(firstTry);
-    if (!nextFirst.has(slot.orig)) nextFirst.set(slot.orig, ok && slot.retry === 0 && !res.imperfect);
+    if (!nextFirst.has(slot.orig)) nextFirst.set(slot.orig, !graded || (ok && slot.retry === 0 && !res.imperfect));
     setFirstTry(nextFirst);
 
     if (ok) {
@@ -132,7 +135,7 @@ export function Session({ spec, nav, guard }: { spec: SessionSpec; nav: Nav; gua
       setCombo(0);
       if (isTest) setMistakes((m) => m + 1);
       // Lessons replay mistakes at the end (up to twice), like Duolingo.
-      else if (slot.retry < 2) setQueue((q) => [...q, { ex: { ...ex, uid: ex.uid + 'r' }, orig: slot.orig, retry: slot.retry + 1 }]);
+      else if (slot.retry < 2) setQueue((q) => [...q, { ex: { ...ex, uid: ex.uid + 'r', isNew: false }, orig: slot.orig, retry: slot.retry + 1 }]);
     }
     // Hear the right Bangla after answering.
     if (ok && ex.solution && ['buildBn', 'typeBn', 'pickBn', 'fill'].includes(ex.kind)) void speak(ex.solution, ex.voice);
@@ -198,7 +201,7 @@ export function Session({ spec, nav, guard }: { spec: SessionSpec; nav: Nav; gua
   const progress = solved.size / total;
   const ex = slot.ex;
   const selfDone = ex.kind === 'match' || ex.kind === 'speak';
-  const correctText = ex.solution;
+  const correctText = personal(ex.solution);
   const meaning =
     ex.meaning ??
     (ex.kind === 'chat' ? ex.prompt : ex.kind === 'buildBn' || ex.kind === 'typeBn' || ex.kind === 'fill' || ex.kind === 'pickBn' ? ex.prompt : undefined);

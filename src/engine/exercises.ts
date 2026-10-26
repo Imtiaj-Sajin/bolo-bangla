@@ -253,7 +253,8 @@ class Gen {
     const answer = sentenceTiles(this.nat(it));
     const have = new Set(answer.map((t) => t.toLowerCase()));
     const extra: string[] = [];
-    for (const o of this.r.shuffle(this.others(it, [...this.sentences, ...this.words]))) {
+    // Wrong tiles come from other sentences' translations (never from word glosses like "yes (polite)").
+    for (const o of this.r.shuffle(this.others(it, this.sentences))) {
       for (const t of sentenceTiles(this.nat(o))) {
         if (!have.has(t.toLowerCase()) && !extra.some((e) => e.toLowerCase() === t.toLowerCase())) extra.push(t);
       }
@@ -296,7 +297,7 @@ class Gen {
       prompt: this.nat(it),
       voice: it.voice,
       tiles: this.bnTiles(it),
-      accepted: alts(it.bn),
+      accepted: it.alts,
       solution: it.bn,
     };
   }
@@ -309,7 +310,7 @@ class Gen {
       bn: it.bn,
       voice: it.voice,
       tiles: this.bnTiles(it),
-      accepted: alts(it.bn),
+      accepted: it.alts,
       solution: it.bn,
       meaning: this.nat(it),
     };
@@ -323,7 +324,7 @@ class Gen {
       prompt: this.nat(it),
       voice: it.voice,
       bn: it.bn,
-      accepted: alts(it.bn),
+      accepted: it.alts,
       solution: it.bn,
     };
   }
@@ -424,6 +425,11 @@ function weakest(pool: Item[], mem: MemMap, n: number, r: Rng): Item[] {
 
 const isShort = (it: Item) => tokens(it.bn).length <= 4;
 
+/** Does Banglish sentence `s` contain word/phrase `w` as whole words? */
+function containsWord(s: string, w: string): boolean {
+  return ` ${clean(s)} `.includes(` ${clean(w)} `);
+}
+
 /** Keep at most `cap` exercises of any one kind (Duolingo caps exercise types per session). */
 function capKinds(list: Exercise[], cap: number, except: ExKind[] = []): Exercise[] {
   const count: Partial<Record<ExKind, number>> = {};
@@ -452,18 +458,27 @@ export function lessonSession(node: PathNode, round: number, o: SessionOptions):
   const out: Exercise[] = [];
 
   if (round === 0) {
-    // Introduce each new word, reinforcing every second one.
+    // Duolingo rhythm: meet a word, check it, then see it used in a sentence straight away.
+    const pending = [...ns];
+    const introduced: Item[] = [];
+    const ready = (s: Item) => nw.every((w) => !containsWord(s.bn, w.bn) || introduced.includes(w));
     nw.forEach((w, i) => {
-      out.push(g.pickImage(w, true) ?? g.pickMeaning(w, true)!);
+      const intro = i % 3 === 2 ? g.pickMeaning(w, true) : (g.pickImage(w, true) ?? g.pickMeaning(w, true));
+      out.push(...compact([intro]));
+      introduced.push(w);
       if (i % 2 === 1) out.push(...compact([r.next() < 0.5 ? g.pickBn(nw[i - 1]) : g.listenPick(nw[i])]));
+      const s = pending.find((x) => containsWord(x.bn, w.bn) && ready(x));
+      if (s) {
+        pending.splice(pending.indexOf(s), 1);
+        out.push(g.buildNative(s));
+      }
     });
     out.push(...compact([g.match(r.shuffle([...nw, ...weakest(previous.filter((p) => p.kind === 'word'), o.mem, 3, r)]))]));
-    const sen = r.shuffle(ns);
-    sen.slice(0, 3).forEach((s) => out.push(g.buildNative(s)));
-    sen.slice(3, 5).forEach((s) => out.push(g.buildBn(s)));
-    out.push(...compact([sen[5] && g.fill(sen[5]), sen[0] && g.listenPick(sen[0])]));
+    const rest = r.shuffle(pending);
+    rest.slice(0, 2).forEach((s) => out.push(g.buildBn(s)));
+    out.push(...compact([rest[2] && g.fill(rest[2]), rest[3] ? g.buildNative(rest[3]) : null, ns[0] && g.listenPick(r.pick(ns))]));
     chats.slice(0, 1).forEach((c) => out.push(g.chat(c)));
-    return capKinds(out, 4, ['pickImage', 'pickMeaning']).slice(0, 16);
+    return capKinds(out, 5, ['pickImage', 'pickMeaning']).slice(0, 16);
   }
 
   // Round 2: produce what was introduced, plus spaced review of older material.
