@@ -1,6 +1,6 @@
 // Writes tools/audio/needed.json (every clip the app can play) and reports which
 // Banglish phrases still need a Bengali-script spelling in tools/audio/bn/*.json.
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { speakables } from './speakables';
 
@@ -24,5 +24,6 @@ if (missing.length) {
   writeFileSync(join(root, 'tools', 'audio', 'missing.json'), JSON.stringify(Object.fromEntries(missing.map((m) => [m.id, `?? ${m.en}`])), null, 1));
   console.log(`${missing.length} phrase(s) need a spelling -> tools/audio/missing.json`);
 } else {
+  rmSync(join(root, 'tools', 'audio', 'missing.json'), { force: true });
   console.log('Every phrase has a Bengali-script spelling.');
 }

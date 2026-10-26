@@ -62,7 +62,11 @@ const SWAP_GROUPS: string[][] = [
   ['ki', 'ke', 'kothay', 'kokhon', 'keno', 'kemon', 'koto', 'kivabe'],
   ['aj', 'kal', 'porshu', 'ekhon'],
   ['bhalo', 'kharap', 'boro', 'choto'],
-  ['ek', 'dui', 'tin', 'char', 'pach', 'choy', 'shat', 'aat', 'noy', 'dosh'],
+  ['ek', 'dui', 'tin', 'char', 'pach', 'choy', 'shat', 'at', 'noy', 'dosh'],
+  ['bish', 'ponchash', 'eksho', 'pachsho'],
+  ['ekta', 'duita', 'atta'],
+  ['charjon', 'pachjon', 'noyjon', 'duijon'],
+  ['khai', 'khao', 'khan', 'khay', 'khabo', 'khabe', 'khaben'],
 ];
 
 const PROPER = new Set(['I', 'Allah', 'Indonesia', 'Bangladesh', 'Dhaka', 'Jakarta']);
