@@ -1,0 +1,115 @@
+/* Design tokens. Dark is the default look (like the Duolingo app in dark mode); light follows the system. */
+:root {
+  color-scheme: light dark;
+
+  &:has(> head > meta[name='color-scheme'][content='dark']) {
+    color-scheme: dark;
+  }
+  &:has(> head > meta[name='color-scheme'][content='light']) {
+    color-scheme: light;
+  }
+
+  /* Brand colours (same in both schemes) */
+  --green: #58cc02;
+  --green-lip: #58a700;
+  --green-soft: #89e219;
+  --blue: #1cb0f6;
+  --blue-lip: #1899d6;
+  --red: #ff4b4b;
+  --red-lip: #ea2b2b;
+  --orange: #ff9600;
+  --orange-lip: #cd7900;
+  --gold: #ffc800;
+  --gold-lip: #e5a800;
+  --purple: #ce82ff;
+  --purple-lip: #a568cc;
+  --teal: #00cd9c;
+  --teal-lip: #00a47c;
+  --pink: #ff86d0;
+  --pink-lip: #e06bb3;
+  --bd-green: #006a4e;
+  --bd-red: #f42a41;
+
+  /* Surfaces */
+  --bg-light: #ffffff;
+  --bg-dark: #131f24;
+  --bg: light-dark(var(--bg-light), var(--bg-dark));
+  --surface: light-dark(#f7f7f7, #1a2a31);
+  --surface-2: light-dark(#ffffff, #202f36);
+  --line: light-dark(#e5e5e5, #37464f);
+  --line-lip: light-dark(#d0d0d0, #2a383f);
+  --text: light-dark(#3c3c3c, #f1f7fb);
+  --muted: light-dark(#777777, #9fb1ba);
+  --faint: light-dark(#afafaf, #52656d);
+  --locked: light-dark(#e5e5e5, #37464f);
+  --locked-lip: light-dark(#cecece, #2b3940);
+  --locked-ink: light-dark(#afafaf, #52656d);
+
+  --ok-bg: light-dark(#d7ffb8, #1f3520);
+  --ok-ink: light-dark(#58a700, #79d634);
+  --bad-bg: light-dark(#ffdfe0, #3a2226);
+  --bad-ink: light-dark(#ea2b2b, #ff6a6a);
+  --tile-sel: light-dark(#ddf4ff, #1b3644);
+
+  --radius: 16px;
+  --radius-sm: 12px;
+  --font: 'Nunito Variable', 'Nunito', system-ui, sans-serif;
+  --ease: cubic-bezier(0.22, 0.9, 0.24, 1);
+  --springy: cubic-bezier(0.3, 1.45, 0.45, 1);
+  --maxw: 560px;
+
+  accent-color: var(--green);
+  scrollbar-color: var(--line) transparent;
+}
+
+/* Fallback for browsers without light-dark(): pick colours with the media query. */
+@supports not (color: light-dark(white, black)) {
+  :root {
+    --bg: var(--bg-dark);
+    --surface: #1a2a31;
+    --surface-2: #202f36;
+    --line: #37464f;
+    --line-lip: #2a383f;
+    --text: #f1f7fb;
+    --muted: #9fb1ba;
+    --faint: #52656d;
+    --locked: #37464f;
+    --locked-lip: #2b3940;
+    --locked-ink: #52656d;
+    --ok-bg: #1f3520;
+    --ok-ink: #79d634;
+    --bad-bg: #3a2226;
+    --bad-ink: #ff6a6a;
+    --tile-sel: #1b3644;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: var(--bg-light);
+      --surface: #f7f7f7;
+      --surface-2: #ffffff;
+      --line: #e5e5e5;
+      --line-lip: #d0d0d0;
+      --text: #3c3c3c;
+      --muted: #777777;
+      --faint: #afafaf;
+      --locked: #e5e5e5;
+      --locked-lip: #cecece;
+      --locked-ink: #afafaf;
+      --ok-bg: #d7ffb8;
+      --ok-ink: #58a700;
+      --bad-bg: #ffdfe0;
+      --bad-ink: #ea2b2b;
+      --tile-sel: #ddf4ff;
+    }
+  }
+}
+
+/* Unit colour themes: set --c / --c-lip on a container. */
+.c-green { --c: var(--green); --c-lip: var(--green-lip); }
+.c-purple { --c: var(--purple); --c-lip: var(--purple-lip); }
+.c-teal { --c: var(--teal); --c-lip: var(--teal-lip); }
+.c-blue { --c: var(--blue); --c-lip: var(--blue-lip); }
+.c-orange { --c: var(--orange); --c-lip: var(--orange-lip); }
+.c-pink { --c: var(--pink); --c-lip: var(--pink-lip); }
+.c-red { --c: var(--red); --c-lip: var(--red-lip); }
+.c-gold { --c: var(--gold); --c-lip: var(--gold-lip); }

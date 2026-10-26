@@ -1,0 +1,13 @@
+// The three levels. Every unit must be finished (and its test passed) before the next unlocks.
+import type { LevelDef } from './types';
+import { u01 } from './units/u01-salam';
+
+export const LEVELS: LevelDef[] = [
+  {
+    id: 'basic',
+    n: 1,
+    title: { en: 'Basic', id: 'Dasar' },
+    subtitle: { en: 'Everyday words to talk with the family', id: 'Kata sehari-hari untuk bicara dengan keluarga' },
+    units: [u01],
+  },
+];

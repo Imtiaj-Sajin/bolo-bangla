@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.mp4
+*.local
+.DS_Store
+tools/audio/.venv/
+tools/audio/needed.json
+tools/audio/missing.json

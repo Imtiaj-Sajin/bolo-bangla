@@ -1,0 +1,32 @@
+{
+  "name": "bolo-bangla",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "npm run check && tsc --noEmit && vite build && node tools/scripts/check-no-bengali.mjs dist",
+    "preview": "vite preview --host",
+    "check": "node tools/scripts/check-no-bengali.mjs src public README.md && tsx tools/scripts/validate-content.ts",
+    "audio:list": "tsx tools/scripts/export-audio-list.ts",
+    "audio:make": "npm run audio:list && python tools/audio/generate.py",
+    "icons": "node tools/scripts/make-icons.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fontsource-variable/nunito": "^5.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "sharp": "^0.35.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vite-plugin-pwa": "^2.0.0"
+  }
+}
