@@ -110,11 +110,18 @@ function LevelScreen({ levelId, onNext }: { levelId: string; onNext: () => void 
       <div className="bounce-in">
         <Mascot mood="cheer" size={170} />
       </div>
-      <h1>{t('levelUnlockedTitle')}</h1>
-      {nextUnit && (
-        <h2 style={{ fontSize: 26, fontWeight: 900 }}>
-          {t('level')} {nextUnit.level.n}: {nextUnit.level.title[lang]}
-        </h2>
+      {nextUnit ? (
+        <>
+          <h1>{t('levelUnlockedTitle')}</h1>
+          <h2 style={{ fontSize: 26, fontWeight: 900 }}>
+            {t('level')} {nextUnit.level.n}: {nextUnit.level.title[lang]}
+          </h2>
+        </>
+      ) : (
+        <>
+          <h1>{t('levelCompleteTitle')}</h1>
+          <p className="muted">{t('levelDone', { name: COURSE.units[idx].level.title[lang] })}</p>
+        </>
       )}
       <button type="button" className="btn full" onClick={onNext} autoFocus>
         {t('continue')}

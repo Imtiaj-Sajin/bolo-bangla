@@ -30,7 +30,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,json}'],
-        globIgnores: ['audio/**'],
+        // Audio is cached on demand; only the Latin font subsets are needed offline.
+        globIgnores: ['audio/**', '**/nunito-cyrillic*', '**/nunito-vietnamese*'],
         navigateFallback: 'index.html',
         runtimeCaching: [
           {

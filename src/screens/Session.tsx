@@ -163,6 +163,15 @@ export function Session({ spec, nav, guard }: { spec: SessionSpec; nav: Nav; gua
     setCheck(null);
   };
 
+  /** "Can't speak now": skip this speaking exercise without grading or counting it. */
+  const skipSpeaking = () => {
+    setSolved(new Set(solved).add(slot.orig));
+    setChecked(null);
+    setCheck(null);
+    if (pos + 1 >= queue.length) return finish(firstTry, bestCombo);
+    setPos(pos + 1);
+  };
+
   const skipListening = () => {
     setNoListen(true);
     // Treat the current one as not asked.
@@ -200,6 +209,8 @@ export function Session({ spec, nav, guard }: { spec: SessionSpec; nav: Nav; gua
 
   const progress = solved.size / total;
   const ex = slot.ex;
+  // Dev-only hook for the automated walkthrough (removed from production builds).
+  if (import.meta.env.DEV) (window as unknown as { __boloEx: Exercise }).__boloEx = ex;
   const selfDone = ex.kind === 'match' || ex.kind === 'speak';
   const correctText = personal(ex.solution);
   const meaning =
@@ -274,7 +285,7 @@ export function Session({ spec, nav, guard }: { spec: SessionSpec; nav: Nav; gua
           </button>
         ) : selfDone ? (
           ex.kind === 'speak' ? (
-            <button type="button" className="btn ghost muted full" onClick={() => record({ verdict: 'right' })}>
+            <button type="button" className="btn ghost muted full" onClick={skipSpeaking}>
               {t('cantSpeak')}
             </button>
           ) : null

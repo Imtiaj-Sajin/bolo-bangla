@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { Nav } from '../App';
 import { first } from '../engine/text';
+import { UPCOMING } from '../content/course';
 import { COURSE, PASS, type PathNode, type UnitInfo } from '../engine/course';
 import { useT } from '../i18n/ui';
 import {
@@ -202,9 +203,19 @@ export function Learn({ nav }: { nav: Nav }) {
         {cur >= COURSE.path.length && (
           <div className="center stack" style={{ padding: 32 }}>
             <Mascot mood="cheer" size={140} />
-            <h2>{t('courseDone')}</h2>
+            <h2>{UPCOMING.length ? t('levelDone', { name: COURSE.units[COURSE.units.length - 1].level.title[lang] }) : t('courseDone')}</h2>
           </div>
         )}
+        {UPCOMING.map((lv) => (
+          <div key={lv.n} className="level-header locked">
+            <div className="lv">
+              <Lock size={14} /> {t('level')} {lv.n}
+            </div>
+            <h2>{lv.title[lang]}</h2>
+            <p>{lv.subtitle[lang]}</p>
+            <p style={{ marginTop: 6, fontWeight: 800 }}>{t('comingSoon')}</p>
+          </div>
+        ))}
       </main>
 
       {showJump && (

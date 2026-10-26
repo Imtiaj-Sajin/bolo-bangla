@@ -52,6 +52,8 @@ const en = {
   chestOpen: 'Open the chest!',
   chestGot: 'You found {n} gems!',
   courseDone: 'You finished the whole course! Alhamdulillah — now go talk with your family!',
+  levelDone: 'You passed {name}! Alhamdulillah. The next level is on its way.',
+  comingSoon: 'Coming soon',
   // exercise titles
   exPickImage: 'Select the correct picture',
   exPickMeaning: 'What does this mean?',
@@ -97,6 +99,7 @@ const en = {
   streakDays: '{n} day streak!',
   streakSub: 'Practise every day to keep your streak growing.',
   levelUnlockedTitle: 'New level unlocked!',
+  levelCompleteTitle: 'Level complete!',
   heartsLeft: 'Mistakes left',
   outOfHearts: 'You ran out of hearts',
   // tabs
@@ -232,6 +235,8 @@ const id: Record<UiKey, string> = {
   chestOpen: 'Buka petinya!',
   chestGot: 'Kamu dapat {n} permata!',
   courseDone: 'Kamu menyelesaikan seluruh kursus! Alhamdulillah — sekarang ayo ngobrol dengan keluargamu!',
+  levelDone: 'Kamu lulus level {name}! Alhamdulillah. Level berikutnya segera hadir.',
+  comingSoon: 'Segera hadir',
   exPickImage: 'Pilih gambar yang benar',
   exPickMeaning: 'Apa artinya?',
   exPickMeaningAudio: 'Apa yang kamu dengar?',
@@ -274,6 +279,7 @@ const id: Record<UiKey, string> = {
   streakDays: 'Runtutan {n} hari!',
   streakSub: 'Berlatih setiap hari supaya runtutanmu terus bertambah.',
   levelUnlockedTitle: 'Level baru terbuka!',
+  levelCompleteTitle: 'Level selesai!',
   heartsLeft: 'Sisa kesalahan',
   outOfHearts: 'Nyawamu habis',
   tabLearn: 'Belajar',
