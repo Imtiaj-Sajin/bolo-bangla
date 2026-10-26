@@ -30,7 +30,7 @@ export const u01: UnitDef = {
           'Menantu memanggil ayah mertuanya “Abba”, seperti ayahnya sendiri.',
         )),
       ],
-      forms: [f('ma', 'dear (elders call a young woman “ma”)', 'Nak (orang tua memanggil perempuan muda “ma”)')],
+      forms: [f('ma', 'mother; “dear” when elders call you', 'ibu; “Nak” saat orang tua memanggilmu')],
       sentences: [
         s('Assalamu alaikum, Amma.', 'Peace be upon you, Amma.|Hello, Amma.', 'Assalamualaikum, Amma.'),
         s('Assalamu alaikum, Abba.', 'Peace be upon you, Abba.|Hello, Abba.', 'Assalamualaikum, Abba.'),
