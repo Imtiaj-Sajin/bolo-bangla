@@ -10,6 +10,22 @@ A Duolingo-style course for learning **spoken Bangladeshi Bangla**, built for En
 - **Spaced repetition:** a half-life memory model picks words to review in the Practice tab.
 - **Installable PWA:** add it to the home screen on Android and it works offline.
 
+**Live app:** https://imtiaj-sajin.github.io/bolo-bangla/
+
+On Android, open the link in Chrome, then tap **⋮ → Add to Home screen** (or **Install app**). It opens full-screen like a normal app and keeps working offline. In the app, **Profile → Download all audio** saves every voice clip for offline use.
+
+## Course status
+
+| Level | Units | Status |
+| --- | --- | --- |
+| 1 · Basic | Greet the family · About me · My new family · Have you eaten? · Say it again, please · Numbers and money · Around the house · How I feel | Done: 8 units, 32 lessons, about 400 words and sentences, 700+ audio clips |
+| 2 · Intermediate | Daily routine, kitchen, shopping, getting around, health, past and future, phone calls | Planned |
+| 3 · Advanced | Feelings and opinions, Ramadan and Eid, weddings, guests, polite refusals, telling stories | Planned |
+
+Each unit has 4 lessons (2 rounds each), a listening session, a family chat session, a treasure chest, a story, a review and a unit test (80% to pass). Each level ends with an exam (80% to pass) that unlocks the next level.
+
+See [docs/CONTENT_GUIDE.md](docs/CONTENT_GUIDE.md) for how to write new units.
+
 ## Run it
 
 ```bash

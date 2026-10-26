@@ -45,9 +45,11 @@ export interface Progress {
 
 const KEY = 'bolo.progress.v1';
 
+const phoneLang = (): Lang => (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('id') ? 'id' : 'en');
+
 const fresh = (): Progress => ({
   v: 1,
-  profile: { name: '', lang: 'en', goal: 20, sound: true, theme: 'system', onboarded: false, slowFirst: false },
+  profile: { name: '', lang: phoneLang(), goal: 20, sound: true, theme: 'system', onboarded: false, slowFirst: false },
   xp: 0,
   gems: 50,
   streak: { count: 0, last: '', freezes: 0, best: 0 },
