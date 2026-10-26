@@ -10,7 +10,7 @@ A Duolingo-style course for learning **spoken Bangladeshi Bangla**, built for En
 - **Spaced repetition:** a half-life memory model picks words to review in the Practice tab.
 - **Installable PWA:** add it to the home screen on Android and it works offline.
 
-**Live app:** https://imtiaj-sajin.github.io/bolo-bangla/
+**Live app:** <https://imtiaj-sajin.github.io/bolo-bangla/>
 
 On Android, open the link in Chrome, then tap **⋮ → Add to Home screen** (or **Install app**). It opens full-screen like a normal app and keeps working offline. In the app, **Profile → Download all audio** saves every voice clip for offline use.
 
