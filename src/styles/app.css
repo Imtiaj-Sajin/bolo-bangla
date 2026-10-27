@@ -917,7 +917,20 @@ dialog.full[open] {
 }
 .hint-word.nogloss {
   text-decoration: none;
-  cursor: default;
+}
+.hint-word.fresh {
+  color: var(--purple);
+  text-decoration-color: var(--purple);
+}
+/* The character who is talking bobs gently while the clip plays. */
+.talking {
+  animation: talk 0.45s ease-in-out infinite alternate;
+  transform-origin: 50% 90%;
+}
+@keyframes talk {
+  to {
+    transform: scale(1.04, 0.97) translateY(1px);
+  }
 }
 .hint-pop {
   position: absolute;

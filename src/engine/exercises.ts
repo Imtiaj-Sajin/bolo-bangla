@@ -49,6 +49,8 @@ export interface Exercise {
   /** Shown in the feedback banner. */
   solution: string;
   meaning?: string;
+  /** This lesson's new words (clean form), highlighted in purple where they appear. */
+  fresh?: string[];
 }
 
 // Words that swap with each other to make near-miss distractors.
@@ -59,7 +61,7 @@ const SWAP_GROUPS: string[][] = [
   ['achi', 'acho', 'achen', 'ache'],
   ['eta', 'ota', 'seta'],
   ['ekhane', 'okhane', 'shekhane'],
-  ['ki', 'ke', 'kothay', 'kokhon', 'keno', 'kemon', 'koto', 'kivabe'],
+  ['ki', 'ke', 'kothay', 'kokhon', 'keno', 'kemon', 'koto', 'kibhabe'],
   ['aj', 'kal', 'porshu', 'ekhon'],
   ['bhalo', 'kharap', 'boro', 'choto'],
   ['ek', 'dui', 'tin', 'char', 'pach', 'choy', 'shat', 'at', 'noy', 'dosh'],
@@ -82,8 +84,11 @@ function properNouns(): Set<string> {
   const set = new Set(PROPER);
   for (const it of COURSE.items.values()) {
     for (const text of [it.bn, ...alts(it.en), ...alts(it.id)]) {
-      tokens(text).forEach((t, i) => {
-        if (i > 0 && /^[A-Z]/.test(t)) set.add(t);
+      // A capital after "." / "?" / "!" just starts a new sentence; it isn't a name.
+      const raw = text.split(/\s+/);
+      raw.forEach((w, i) => {
+        if (i === 0 || /[.?!]$/.test(raw[i - 1])) return;
+        for (const t of tokens(w)) if (/^[A-Z]/.test(t)) set.add(t);
       });
     }
   }
@@ -117,11 +122,21 @@ function siblings(word: string): string[] {
     for (const w of all) {
       const group = SWAP_GROUPS.find((g) => g.includes(w)) ?? [];
       const stemmed = w.length >= 3 ? (byStem.get(w.slice(0, 3)) ?? []) : [];
-      siblingIndex.set(w, [...new Set([...group, ...stemmed])].filter((x) => x !== w));
+      // Only words the course actually teaches (has a meaning for) may appear as distractors.
+      siblingIndex.set(w, [...new Set([...group, ...stemmed])].filter((x) => x !== w && COURSE.lexicon.has(x)));
     }
   }
   return siblingIndex.get(clean(word)) ?? [];
 }
+
+// Polite and familiar forms of the same verb are both often fine, so never offer one as "wrong" for the other.
+const POLITE_PAIRS: string[][] = [
+  ['ache', 'achen'],
+  ['thake', 'thaken'],
+  ['khay', 'khan'],
+  ['bolen', 'bolben'],
+];
+const politeTwin = (a: string, b: string) => POLITE_PAIRS.some((p) => p.includes(a) && p.includes(b));
 
 function matchCase(src: string, repl: string): string {
   return /^[A-Z]/.test(src) ? repl[0].toUpperCase() + repl.slice(1) : repl;
@@ -134,7 +149,13 @@ class Gen {
     private r: Rng,
     private words: Item[],
     private sentences: Item[],
+    /** Path index of the session: near-miss words must already have been taught by then. */
+    private upTo = Infinity,
   ) {}
+
+  private sib(word: string): string[] {
+    return siblings(word).filter((x) => (COURSE.lexOrigin.get(x) ?? 0) <= this.upTo);
+  }
 
   nat(it: Item): string {
     return first(it[this.lang]);
@@ -157,7 +178,7 @@ class Gen {
     const idx = this.r.shuffle(raw.map((_, i) => i));
     for (const i of idx) {
       const word = raw[i].replace(/[.,!?]/g, '');
-      const sib = siblings(word);
+      const sib = this.sib(word);
       if (!sib.length) continue;
       const repl = this.r.pick(sib);
       const out = [...raw];
@@ -168,13 +189,22 @@ class Gen {
     return null;
   }
 
+  /** Banglish strings that would also be a right answer for `it` (its alternatives, or items with the same meaning). */
+  private alsoRight(it: Item): Set<string> {
+    const meaning = clean(this.nat(it));
+    const pool = it.kind === 'word' ? this.words : this.sentences;
+    const same = pool.filter((o) => alts(o[this.lang]).some((a) => clean(a) === meaning)).flatMap((o) => o.alts);
+    return new Set([...it.alts, ...same].map(clean));
+  }
+
   /** Up to n wrong Banglish strings close to `it`. */
   private bnDistractors(it: Item, n: number): string[] {
+    const right = this.alsoRight(it);
     const out = new Set<string>();
     if (it.kind === 'sentence') {
-      for (let tries = 0; tries < 6 && out.size < n; tries++) {
+      for (let tries = 0; tries < 8 && out.size < n; tries++) {
         const m = this.mutate(it.bn);
-        if (m) out.add(m);
+        if (m && !right.has(clean(m))) out.add(m);
       }
     }
     const pool = this.others(it, it.kind === 'word' ? this.words : this.sentences);
@@ -183,9 +213,9 @@ class Gen {
     );
     for (const o of this.r.shuffle(byLen.slice(0, 8))) {
       if (out.size >= n) break;
-      out.add(o.bn);
+      if (!right.has(clean(o.bn))) out.add(o.bn);
     }
-    return [...out].filter((x) => clean(x) !== clean(it.bn)).slice(0, n);
+    return [...out].slice(0, n);
   }
 
   pickImage(it: Item, isNew = false): Exercise | null {
@@ -257,16 +287,29 @@ class Gen {
     };
   }
 
+  /** Short plain meanings of words ("Mom", "sister"), without notes in brackets. */
+  private glossTiles(w: Item): string[] {
+    const g = this.nat(w).replace(/\(.*?\)/g, '').split(',')[0].trim();
+    return g && tokens(g).length <= 2 ? sentenceTiles(g) : [];
+  }
+
   buildNative(it: Item): Exercise {
     const answer = sentenceTiles(this.nat(it));
     const have = new Set(answer.map((t) => t.toLowerCase()));
     const extra: string[] = [];
-    // Wrong tiles come from other sentences' translations (never from word glosses like "yes (polite)").
-    for (const o of this.r.shuffle(this.others(it, this.sentences))) {
-      for (const t of sentenceTiles(this.nat(o))) {
-        if (!have.has(t.toLowerCase()) && !extra.some((e) => e.toLowerCase() === t.toLowerCase())) extra.push(t);
-      }
-      if (extra.length >= 8) break;
+    const add = (t: string) => {
+      if (!have.has(t.toLowerCase()) && !extra.some((e) => e.toLowerCase() === t.toLowerCase())) extra.push(t);
+    };
+    // Wrong tiles come from the same topic first (same unit's word meanings and sentences),
+    // like Duolingo's "mom / aunt / husband" — then from anywhere else.
+    const sameUnitWords = this.r.shuffle(this.words.filter((w) => w.unitN === it.unitN));
+    for (const w of sameUnitWords.slice(0, 4)) this.glossTiles(w).forEach(add);
+    const others = this.others(it, this.sentences);
+    const near = this.r.shuffle(others.filter((o) => o.unitN === it.unitN));
+    const far = this.r.shuffle(others.filter((o) => o.unitN !== it.unitN));
+    for (const o of [...near, ...far]) {
+      sentenceTiles(this.nat(o)).forEach(add);
+      if (extra.length >= 10) break;
     }
     const nExtra = Math.min(answer.length >= 5 ? 4 : 3, extra.length);
     return {
@@ -286,7 +329,7 @@ class Gen {
     const have = new Set(answer.map((t) => clean(t)));
     const extra = new Set<string>();
     for (const t of this.r.shuffle(answer)) {
-      for (const s of this.r.shuffle(siblings(t)).slice(0, 1)) if (!have.has(s)) extra.add(s);
+      for (const s of this.r.shuffle(this.sib(t)).slice(0, 1)) if (!have.has(s)) extra.add(s);
       if (extra.size >= 2) break;
     }
     const filler = this.r.shuffle([...this.words, ...this.sentences]).flatMap((o) => sentenceTiles(o.bn));
@@ -365,10 +408,13 @@ class Gen {
     if (raw.length < 2) return null;
     const cands = raw
       .map((t, i) => ({ i, word: t.replace(/[.,!?]/g, '') }))
-      .filter((c) => c.word.length >= 2 && siblings(c.word).length >= 2);
+      .filter((c) => c.word.length >= 2 && this.sib(c.word).length >= 2);
     if (!cands.length) return null;
     const c = this.r.pick(cands);
-    const wrong = this.r.sample(siblings(c.word), 2).map((x) => matchCase(c.word, x));
+    const word = clean(c.word);
+    const pool = this.sib(c.word).filter((x) => !politeTwin(word, x));
+    if (pool.length < 2) return null;
+    const wrong = this.r.sample(pool, 2).map((x) => matchCase(c.word, x));
     const opts = this.r.shuffle([c.word, ...wrong]);
     const trailing = raw[c.i].slice(raw[c.i].indexOf(c.word) + c.word.length);
     return {
@@ -459,7 +505,7 @@ export function lessonSession(node: PathNode, round: number, o: SessionOptions):
   const known = itemsUpTo(node.index);
   const words = known.filter((i) => i.kind === 'word');
   const sents = known.filter((i) => i.kind === 'sentence');
-  const g = new Gen(o.lang, r, words, sents);
+  const g = new Gen(o.lang, r, words, sents, node.index);
   const { words: nw, sentences: ns } = lessonItems(node);
   const chats = node.unit.def.lessons[node.lesson ?? 0].chats ?? [];
   const previous = known.filter((i) => i.introAt < node.index);
@@ -486,7 +532,10 @@ export function lessonSession(node: PathNode, round: number, o: SessionOptions):
     rest.slice(0, 2).forEach((s) => out.push(g.buildBn(s)));
     out.push(...compact([rest[2] && g.fill(rest[2]), rest[3] ? g.buildNative(rest[3]) : null, ns[0] && g.listenPick(r.pick(ns))]));
     chats.slice(0, 1).forEach((c) => out.push(g.chat(c)));
-    return capKinds(out, 5, ['pickImage', 'pickMeaning']).slice(0, 16);
+    const fresh = nw.map((w) => w.key);
+    return capKinds(out, 5, ['pickImage', 'pickMeaning'])
+      .slice(0, 16)
+      .map((e) => ({ ...e, fresh }));
   }
 
   // Round 2: produce what was introduced, plus spaced review of older material.
@@ -510,7 +559,7 @@ export function lessonSession(node: PathNode, round: number, o: SessionOptions):
 export function listenSession(node: PathNode, o: SessionOptions): Exercise[] {
   const r = rng(o.seed);
   const known = itemsUpTo(node.index);
-  const g = new Gen(o.lang, r, known.filter((i) => i.kind === 'word'), known.filter((i) => i.kind === 'sentence'));
+  const g = new Gen(o.lang, r, known.filter((i) => i.kind === 'word'), known.filter((i) => i.kind === 'sentence'), node.index);
   const pool = r.shuffle(unitItems(node.unit).filter((i) => i.introAt <= node.index));
   const sen = pool.filter((i) => i.kind === 'sentence');
   const wds = pool.filter((i) => i.kind === 'word');
@@ -527,7 +576,7 @@ export function listenSession(node: PathNode, o: SessionOptions): Exercise[] {
 export function chatSession(node: PathNode, o: SessionOptions): Exercise[] {
   const r = rng(o.seed);
   const known = itemsUpTo(node.index);
-  const g = new Gen(o.lang, r, known.filter((i) => i.kind === 'word'), known.filter((i) => i.kind === 'sentence'));
+  const g = new Gen(o.lang, r, known.filter((i) => i.kind === 'word'), known.filter((i) => i.kind === 'sentence'), node.index);
   const out = node.unit.chats.map((c) => g.chat(c));
   const sen = r.shuffle(node.unit.sentences.filter((s) => s.introAt <= node.index));
   for (const s of sen) {
@@ -541,7 +590,7 @@ export function chatSession(node: PathNode, o: SessionOptions): Exercise[] {
 export function reviewSession(scope: Item[], upTo: number, n: number, o: SessionOptions, test = false): Exercise[] {
   const r = rng(o.seed);
   const known = itemsUpTo(upTo);
-  const g = new Gen(o.lang, r, known.filter((i) => i.kind === 'word'), known.filter((i) => i.kind === 'sentence'));
+  const g = new Gen(o.lang, r, known.filter((i) => i.kind === 'word'), known.filter((i) => i.kind === 'sentence'), upTo);
   const picked = test ? r.sample(scope, n + 4) : weakest(scope, o.mem, n + 4, r);
   const out: Exercise[] = [];
   picked.forEach((it, i) => {
@@ -576,7 +625,7 @@ export function practiceSession(mode: 'review' | 'mistakes' | 'listen', upTo: nu
     return wrong.length ? reviewSession(wrong, upTo, Math.min(10, wrong.length + 2), o) : [];
   }
   const r = rng(o.seed);
-  const g = new Gen(o.lang, r, itemsUpTo(upTo).filter((i) => i.kind === 'word'), itemsUpTo(upTo).filter((i) => i.kind === 'sentence'));
+  const g = new Gen(o.lang, r, itemsUpTo(upTo).filter((i) => i.kind === 'word'), itemsUpTo(upTo).filter((i) => i.kind === 'sentence'), upTo);
   const pool = weakest(learned, o.mem, 14, r);
   return r.shuffle(
     compact(

@@ -68,9 +68,14 @@ function build() {
   const lexicon = new Map<string, Gloss>();
   const levelExams = new Map<string, PathNode>();
 
-  const addGloss = (g: Gloss) => {
+  /** Path index where each glossed word/phrase is first taught (for the content checks). */
+  const lexOrigin = new Map<string, number>();
+  const addGloss = (g: Gloss, at = path.length) => {
     const k = clean(g.bn);
-    if (!lexicon.has(k)) lexicon.set(k, g);
+    if (!lexicon.has(k)) {
+      lexicon.set(k, g);
+      lexOrigin.set(k, at);
+    }
   };
 
   let unitN = 0;
@@ -125,14 +130,15 @@ function build() {
         return item;
       };
 
-      def.forms?.forEach(addGloss);
+      const unitStart = path.length;
+      def.forms?.forEach((g) => addGloss(g, unitStart));
       def.lessons.forEach((lesson, li) => {
         const node = push('lesson', `${def.id}.l${li + 1}`, { lesson: li });
         for (const word of lesson.words) {
           unit.words.push(addItem(word, 'word', node.index));
-          addGloss(word);
+          addGloss(word, node.index);
         }
-        lesson.forms?.forEach(addGloss);
+        lesson.forms?.forEach((g) => addGloss(g, node.index));
         for (const sen of lesson.sentences) unit.sentences.push(addItem(sen, 'sentence', node.index));
         if (lesson.chats) unit.chats.push(...lesson.chats);
         if (li === 1) push('listen', `${def.id}.listen`);
@@ -153,7 +159,7 @@ function build() {
       }
     });
   }
-  return { path, units, items, lexicon, levelExams };
+  return { path, units, items, lexicon, lexOrigin, levelExams };
 }
 
 export const COURSE = build();

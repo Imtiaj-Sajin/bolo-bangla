@@ -8,7 +8,7 @@ import { useT } from '../i18n/ui';
 import { useProgress } from '../state/store';
 import { Avatar } from '../ui/Avatar';
 import { Mascot } from '../ui/Mascot';
-import { HintText, SpeakButton } from '../ui/bits';
+import { HintText, SpeakButton, Talk } from '../ui/bits';
 import { personal } from '../ui/personal';
 import { Mic, Play, Star, Stop } from '../ui/icons';
 
@@ -102,7 +102,7 @@ function PickImage({ ex, checked, setCheck }: ExProps) {
       <h1 className="ex-title">{t('exPickImage')}</h1>
       <div className="prompt-row" style={{ alignItems: 'center' }}>
         <SpeakButton text={ex.bn!} voice={ex.voice} />
-        <span style={{ fontSize: 22, fontWeight: 800 }}>{ex.isNew ? <HintText bn={ex.bn!} /> : ex.bn}</span>
+        <span style={{ fontSize: 22, fontWeight: 800 }}>{ex.isNew ? <HintText bn={ex.bn!} fresh={ex.fresh} /> : ex.bn}</span>
       </div>
       <div className="image-grid">
         {ex.options!.map((o, i) => (
@@ -160,11 +160,13 @@ function PickMeaning({ ex, checked, setCheck }: ExProps) {
         </div>
       ) : (
         <div className="prompt-row">
-          <Mascot mood="happy" size={84} />
+          <Talk voice={ex.voice}>
+            <Mascot mood="happy" size={84} />
+          </Talk>
           <div className="bubble left grow">
             <div className="row">
               <SpeakButton text={ex.bn!} voice={ex.voice} size="small" />
-              {ex.isNew ? <HintText bn={ex.bn!} /> : <span>{ex.bn}</span>}
+              {ex.isNew ? <HintText bn={ex.bn!} fresh={ex.fresh} /> : <span>{ex.bn}</span>}
             </div>
           </div>
         </div>
@@ -237,11 +239,13 @@ function Build({ ex, checked, setCheck }: ExProps) {
       </h1>
       {ex.kind === 'buildNative' && (
         <div className="prompt-row">
-          <Mascot mood="happy" size={84} />
+          <Talk voice={ex.voice}>
+            <Mascot mood="happy" size={84} />
+          </Talk>
           <div className="bubble left grow">
             <div className="row" style={{ alignItems: 'flex-start' }}>
               <SpeakButton text={ex.bn!} voice={ex.voice} size="small" />
-              <HintText bn={ex.bn!} />
+              <HintText bn={ex.bn!} fresh={ex.fresh} />
             </div>
           </div>
         </div>
@@ -387,9 +391,9 @@ function Fill({ ex, checked, setCheck }: ExProps) {
       <div className="row" style={{ alignItems: 'flex-start' }}>
         <SpeakButton text={ex.bn!} voice={ex.voice} size="small" />
         <p className="fill-sentence">
-          {ex.blank!.before && <HintText bn={ex.blank!.before} />}
+          {ex.blank!.before && <HintText bn={ex.blank!.before} fresh={ex.fresh} />}
           <span className="blank">{sel !== null ? ex.options![sel].text : ' '}</span>
-          {ex.blank!.after && <HintText bn={ex.blank!.after} />}
+          {ex.blank!.after && <HintText bn={ex.blank!.after} fresh={ex.fresh} />}
         </p>
       </div>
       <div className="bank">
@@ -420,7 +424,7 @@ function ChatEx({ ex, checked, setCheck }: ExProps) {
   const pick = (i: number) => {
     sfx.tap();
     setSel(i);
-    void speak(personal(replies[i].bn), 'f');
+    void speak(personal(replies[i].bn), 'you');
     setCheck(() => ({ verdict: replies[i].ok ? 'right' : 'wrong' }));
   };
   return (
@@ -428,13 +432,15 @@ function ChatEx({ ex, checked, setCheck }: ExProps) {
       <h1 className="ex-title">{t('exChat', { name: CHARACTERS[who].name[lang] })}</h1>
       <div className="chat-scene">
         <div className="who">
-          <Avatar who={who} size={92} />
+          <Talk voice={ex.voice}>
+            <Avatar who={who} size={92} />
+          </Talk>
           <div>{CHARACTERS[who].name[lang]}</div>
         </div>
         <div className="bubble left grow">
           <div className="row" style={{ alignItems: 'flex-start' }}>
             <SpeakButton text={ex.bn!} voice={ex.voice} size="small" />
-            <HintText bn={ex.bn!} />
+            <HintText bn={ex.bn!} fresh={ex.fresh} />
           </div>
         </div>
       </div>
@@ -526,12 +532,14 @@ function Speak({ ex, done }: ExProps) {
     <>
       <h1 className="ex-title">{t('exSpeak')}</h1>
       <div className="prompt-row">
-        <Mascot mood="happy" size={84} />
+        <Talk voice={ex.voice}>
+            <Mascot mood="happy" size={84} />
+          </Talk>
         <div className="bubble left grow">
           <div className="row" style={{ alignItems: 'flex-start' }}>
             <SpeakButton text={ex.bn!} voice={ex.voice} size="small" />
             <div>
-              <HintText bn={ex.bn!} />
+              <HintText bn={ex.bn!} fresh={ex.fresh} />
               <div className="muted" style={{ fontSize: 15, marginTop: 4 }}>
                 {ex.prompt}
               </div>

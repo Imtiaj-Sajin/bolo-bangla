@@ -114,6 +114,9 @@ export function hash(s: string): string {
   return (h >>> 0).toString(36);
 }
 
-export function audioKey(text: string, voice: 'f' | 'm'): string {
+export function audioKey(text: string, voice: string): string {
   return `${voice}-${hash(speechText(text).toLowerCase())}`;
 }
+
+/** Key of the separately recorded slow version (sentences and phrases only). */
+export const slowKey = (text: string, voice: string) => `${audioKey(text, voice)}-s`;

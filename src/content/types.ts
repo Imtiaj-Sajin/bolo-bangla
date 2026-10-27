@@ -4,8 +4,11 @@
 export type Lang = 'en' | 'id';
 export type Tr = { en: string; id: string };
 
-/** Voice used for generated audio: f = female (Nabanita), m = male (Pradeep). */
-export type Voice = 'f' | 'm';
+/**
+ * Voice slot for generated audio: "f" / "m" are the narrators, other slots are characters
+ * (amma, abba, rafi, …). tools/audio/voices.json maps each slot to an actual TTS voice.
+ */
+export type Voice = string;
 
 export type CharId =
   | 'you'

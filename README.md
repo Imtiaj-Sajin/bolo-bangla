@@ -18,7 +18,7 @@ On Android, open the link in Chrome, then tap **⋮ → Add to Home screen** (or
 
 | Level | Units | Status |
 | --- | --- | --- |
-| 1 · Basic | Greet the family · About me · My new family · Have you eaten? · Say it again, please · Numbers and money · Around the house · How I feel | Done: 8 units, 32 lessons, about 400 words and sentences, 700+ audio clips |
+| 1 · Basic | Greet the family · About me · Say it again, please · My new family · Have you eaten? · Numbers and money · Around the house · How I feel | Done: 8 units, 33 lessons, about 410 words and sentences, every word and sentence voiced (each family member has their own voice, plus slow versions) |
 | 2 · Intermediate | Daily routine, kitchen, shopping, getting around, health, past and future, phone calls | Planned |
 | 3 · Advanced | Feelings and opinions, Ramadan and Eid, weddings, guests, polite refusals, telling stories | Planned |
 

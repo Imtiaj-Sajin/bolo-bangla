@@ -15,7 +15,8 @@ export const LEVELS: LevelDef[] = [
     n: 1,
     title: { en: 'Basic', id: 'Dasar' },
     subtitle: { en: 'Everyday words to talk with the family', id: 'Kata sehari-hari untuk bicara dengan keluarga' },
-    units: [u01, u02, u03, u04, u05, u06, u07, u08],
+    // "Say it again" (u05) comes third: she needs those survival phrases from day one.
+    units: [u01, u02, u05, u03, u04, u06, u07, u08],
   },
 ];
 

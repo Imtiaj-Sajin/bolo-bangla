@@ -90,6 +90,7 @@ export const FRIENDS: WordPair[] = [
   { bn: 'nam', id: 'nama', en: 'name' },
   { bn: 'bhasha', id: 'bahasa', en: 'language' },
   { bn: 'shami', id: 'suami', en: 'husband' },
+  { bn: 'stri', id: 'istri', en: 'wife (formal word — at home a wife is “bou”)' },
   { bn: 'khobor', id: 'kabar', en: 'news — “Ki khobor?” = “Apa kabar?”' },
   { bn: 'jobab', id: 'jawab', en: 'answer' },
   { bn: 'duniya', id: 'dunia', en: 'world' },
@@ -111,10 +112,9 @@ export const FRIENDS: WordPair[] = [
 
 /** Same-looking words with different meanings. `indo` says what the look-alike means in Indonesian. */
 export const TRAPS: { bn: string; means: Tr; indo: Tr }[] = [
-  { bn: 'mama', means: { en: 'maternal uncle (mum’s brother)', id: 'paman (saudara laki-laki ibu)' }, indo: { en: 'Indonesian “mama” = mum', id: '“mama” di bahasa Indonesia = ibu' } },
-  { bn: 'dada', means: { en: 'grandfather (dad’s father)', id: 'kakek (ayah dari ayah)' }, indo: { en: 'Indonesian “dada” = chest', id: '“dada” di bahasa Indonesia = bagian tubuh' } },
+  { bn: 'mama', means: { en: 'uncle (Mom’s brother)', id: 'paman (saudara laki-laki ibu)' }, indo: { en: 'Indonesian “mama” = mom', id: '“mama” di bahasa Indonesia = ibu' } },
+  { bn: 'dada', means: { en: 'grandfather (Dad’s father)', id: 'kakek (ayah dari ayah)' }, indo: { en: 'Indonesian “dada” = chest', id: '“dada” di bahasa Indonesia = bagian tubuh' } },
   { bn: 'apa', means: { en: 'elder sister', id: 'kakak perempuan' }, indo: { en: 'Indonesian “apa” = what', id: '“apa” di bahasa Indonesia = kata tanya' } },
-  { bn: 'istri', means: { en: 'ironing clothes — wife is “bou”', id: 'menyetrika — istri = “bou”' }, indo: { en: 'Indonesian “istri” = wife', id: '“istri” di bahasa Indonesia = pasangan perempuan' } },
   { bn: 'chinta', means: { en: 'worry — love is “bhalobasha”', id: 'khawatir — cinta = “bhalobasha”' }, indo: { en: 'Indonesian “cinta” = love', id: '“cinta” di bahasa Indonesia = rasa sayang' } },
   { bn: 'gorom', means: { en: 'hot — salt is “lobon”', id: 'panas — garam = “lobon”' }, indo: { en: 'Indonesian “garam” = salt', id: '“garam” di bahasa Indonesia = bumbu asin' } },
   { bn: 'kopal', means: { en: 'forehead, fate', id: 'dahi, nasib' }, indo: { en: 'Indonesian “kapal” = ship', id: '“kapal” di bahasa Indonesia = kendaraan laut' } },

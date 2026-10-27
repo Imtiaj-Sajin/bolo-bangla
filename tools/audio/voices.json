@@ -1,0 +1,18 @@
+{
+  "_comment": "Voice slot -> edge-tts voice. Nabanita is the main voice, Pradeep second; a few minor roles use multilingual voices. Change a slot and run `npm run audio:make` to re-record it.",
+  "f": { "voice": "bn-BD-NabanitaNeural", "rate": "+0%", "pitch": "+0Hz" },
+  "m": { "voice": "bn-BD-PradeepNeural", "rate": "+0%", "pitch": "+0Hz" },
+  "you": { "voice": "bn-BD-NabanitaNeural", "rate": "+0%", "pitch": "+0Hz" },
+  "amma": { "voice": "bn-BD-NabanitaNeural", "rate": "-5%", "pitch": "-6Hz" },
+  "dadi": { "voice": "bn-BD-NabanitaNeural", "rate": "-12%", "pitch": "-12Hz" },
+  "nila": { "voice": "bn-BD-NabanitaNeural", "rate": "+3%", "pitch": "+5Hz" },
+  "mitu": { "voice": "bn-BD-NabanitaNeural", "rate": "+6%", "pitch": "+24Hz" },
+  "khala": { "voice": "bn-BD-NabanitaNeural", "rate": "-2%", "pitch": "-3Hz" },
+  "doctor": { "voice": "en-US-AvaMultilingualNeural", "rate": "+0%", "pitch": "+0Hz" },
+  "rafi": { "voice": "bn-BD-PradeepNeural", "rate": "+0%", "pitch": "+0Hz" },
+  "abba": { "voice": "bn-BD-PradeepNeural", "rate": "-6%", "pitch": "-8Hz" },
+  "tanim": { "voice": "bn-BD-PradeepNeural", "rate": "+5%", "pitch": "+6Hz" },
+  "chacha": { "voice": "bn-BD-PradeepNeural", "rate": "-3%", "pitch": "-4Hz" },
+  "dokandar": { "voice": "en-US-BrianMultilingualNeural", "rate": "+0%", "pitch": "+0Hz" },
+  "rickshaw": { "voice": "bn-BD-PradeepNeural", "rate": "+2%", "pitch": "-5Hz" }
+}

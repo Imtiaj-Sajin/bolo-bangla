@@ -1,25 +1,36 @@
-// Writes tools/audio/needed.json (every clip the app can play) and reports which
-// Banglish phrases still need a Bengali-script spelling in tools/audio/bn/*.json.
+// Writes tools/audio/needed.json (every clip the app can play) and reports which Banglish
+// phrases still need a Bengali-script spelling in tools/audio/bn/*.json.
+// --prune removes spellings that the course no longer uses.
 import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { speakables } from './speakables';
 
 const root = join(import.meta.dirname, '..', '..');
 const bnDir = join(root, 'tools', 'audio', 'bn');
+const files = existsSync(bnDir) ? readdirSync(bnDir).filter((x) => x.endsWith('.json')).sort() : [];
 const mapping: Record<string, string> = {};
-if (existsSync(bnDir)) {
-  for (const f of readdirSync(bnDir).filter((x) => x.endsWith('.json')).sort()) {
-    Object.assign(mapping, JSON.parse(readFileSync(join(bnDir, f), 'utf8')));
-  }
-}
+for (const f of files) Object.assign(mapping, JSON.parse(readFileSync(join(bnDir, f), 'utf8')));
 
 const list = speakables();
 writeFileSync(join(root, 'tools', 'audio', 'needed.json'), JSON.stringify(list, null, 1));
 
+const ids = new Set(list.map((s) => s.id));
 const missing = [...new Map(list.filter((s) => !mapping[s.id]).map((s) => [s.id, s])).values()];
-const unused = Object.keys(mapping).filter((k) => !list.some((s) => s.id === k));
-console.log(`${list.length} clips, ${new Set(list.map((s) => s.id)).size} unique phrases.`);
-if (unused.length) console.log(`${unused.length} spelling(s) no longer used: ${unused.slice(0, 20).join(', ')}`);
+const unused = Object.keys(mapping).filter((k) => !ids.has(k));
+console.log(`${list.length} clips (+${list.filter((s) => s.slow).length} slow versions), ${ids.size} unique phrases.`);
+
+if (unused.length && process.argv.includes('--prune')) {
+  for (const f of files) {
+    const path = join(bnDir, f);
+    const data: Record<string, string> = JSON.parse(readFileSync(path, 'utf8'));
+    const kept = Object.fromEntries(Object.entries(data).filter(([k]) => ids.has(k)));
+    writeFileSync(path, JSON.stringify(kept, null, 2) + '\n');
+  }
+  console.log(`Pruned ${unused.length} unused spelling(s).`);
+} else if (unused.length) {
+  console.log(`${unused.length} spelling(s) no longer used (run with --prune to remove).`);
+}
+
 if (missing.length) {
   writeFileSync(join(root, 'tools', 'audio', 'missing.json'), JSON.stringify(Object.fromEntries(missing.map((m) => [m.id, `?? ${m.en}`])), null, 1));
   console.log(`${missing.length} phrase(s) need a spelling -> tools/audio/missing.json`);

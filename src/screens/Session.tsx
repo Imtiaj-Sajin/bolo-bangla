@@ -6,7 +6,7 @@ import { PASS, nodeById, type PathNode } from '../engine/course';
 import { practiceSession, sessionFor, type Exercise } from '../engine/exercises';
 import { useT, PRAISE } from '../i18n/ui';
 import { currentIndex, finishSession, getProgress, useProgress, type Reward } from '../state/store';
-import { Bar, Modal } from '../ui/bits';
+import { Bar, Modal, SpeakButton } from '../ui/bits';
 import { Check, Close, Heart } from '../ui/icons';
 import { Mascot } from '../ui/Mascot';
 import { personal } from '../ui/personal';
@@ -23,6 +23,8 @@ interface Slot {
 }
 
 const LISTEN_KINDS = ['listenBuild', 'listenPick'];
+/** Exercises whose correct answer is Banglish (so it can be played back). */
+const BN_SOLUTION = ['buildBn', 'listenBuild', 'typeBn', 'pickBn', 'fill', 'listenPick', 'chat'];
 
 export function Session({ spec, nav, guard }: { spec: SessionSpec; nav: Nav; guard: MutableRefObject<(() => boolean) | null> }) {
   const p = useProgress();
@@ -251,7 +253,14 @@ export function Session({ spec, nav, guard }: { spec: SessionSpec; nav: Nav; gua
                   </span>
                   {t('correctSolution')}
                 </div>
-                {correctText && <div className="sol">{correctText}</div>}
+                {correctText && (
+                  <div className="sol row" style={{ gap: 8 }}>
+                    {BN_SOLUTION.includes(ex.kind) && !correctText.includes(' / ') && (
+                      <SpeakButton text={correctText} voice={ex.kind === 'chat' ? 'you' : ex.voice} size="small" />
+                    )}
+                    <span>{correctText}</span>
+                  </div>
+                )}
                 {meaning && meaning !== correctText && (
                   <div className="sol">
                     <small>{t('meaning')}</small>

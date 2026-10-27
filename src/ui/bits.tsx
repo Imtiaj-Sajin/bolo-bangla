@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { hasAudio, speak } from '../audio/speech';
+import { hasAudio, speak, useSpeaking } from '../audio/speech';
 import type { Voice } from '../content/types';
 import { segment } from '../engine/course';
-import { first } from '../engine/text';
+import { clean, first } from '../engine/text';
 import { useProgress } from '../state/store';
 import { Speaker, Turtle } from './icons';
 
@@ -32,8 +32,11 @@ export function SpeakButton({
   );
 }
 
-/** Banglish text where each known word can be tapped to see its meaning. */
-export function HintText({ bn, className }: { bn: string; className?: string }) {
+/**
+ * Banglish text where every word can be tapped: it is spoken aloud and its meaning pops up.
+ * Words in `fresh` (this lesson's new words) are highlighted in purple, like Duolingo.
+ */
+export function HintText({ bn, className, fresh }: { bn: string; className?: string; fresh?: string[] }) {
   const lang = useProgress().profile.lang;
   const [open, setOpen] = useState<number | null>(null);
   const ref = useRef<HTMLSpanElement>(null);
@@ -48,19 +51,41 @@ export function HintText({ bn, className }: { bn: string; className?: string }) 
   const segs = segment(bn);
   return (
     <span ref={ref} className={className}>
-      {segs.map((s, i) => (
-        <span key={i}>
-          {i > 0 && ' '}
-          {s.gloss ? (
-            <button type="button" className="hint-word" onClick={() => setOpen(open === i ? null : i)}>
-              {s.text}
-              {open === i && <span className="hint-pop">{first(s.gloss[lang])}</span>}
-            </button>
-          ) : (
-            <span className="hint-word nogloss">{s.text}</span>
-          )}
-        </span>
-      ))}
+      {segs.map((s, i) => {
+        const isFresh = !!fresh?.includes(clean(s.text));
+        return (
+          <span key={i}>
+            {i > 0 && ' '}
+            {s.gloss ? (
+              <button
+                type="button"
+                className={`hint-word ${isFresh ? 'fresh' : ''}`}
+                onClick={() => {
+                  void speak(s.text, 'f');
+                  setOpen(open === i ? null : i);
+                }}
+              >
+                {s.text}
+                {open === i && <span className="hint-pop">{first(s.gloss[lang])}</span>}
+              </button>
+            ) : (
+              <button type="button" className="hint-word nogloss" onClick={() => void speak(s.text, 'f')}>
+                {s.text}
+              </button>
+            )}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
+/** Wraps the speaking character so it bobs while its line plays. */
+export function Talk({ voice, children }: { voice?: string; children: ReactNode }) {
+  const talking = useSpeaking(voice);
+  return (
+    <span className={talking ? 'talking' : undefined} style={{ display: 'inline-flex', flex: 'none' }}>
+      {children}
     </span>
   );
 }

@@ -1,6 +1,7 @@
 // Plays the pre-generated Bangla clips in public/audio (made by tools/audio/generate.py).
+import { useSyncExternalStore } from 'react';
 import type { Voice } from '../content/types';
-import { audioKey } from '../engine/text';
+import { audioKey, slowKey } from '../engine/text';
 
 const BASE = import.meta.env.BASE_URL + 'audio/';
 let available: Set<string> | null = null;
@@ -27,19 +28,49 @@ export function audioUrl(text: string, voice: Voice): string {
   return `${BASE}${audioKey(text, voice)}.mp3`;
 }
 
+// Who is talking right now, so the speaking character can animate.
+let speakingVoice: Voice | null = null;
+const listeners = new Set<() => void>();
+const setSpeaking = (v: Voice | null) => {
+  speakingVoice = v;
+  listeners.forEach((l) => l());
+};
+
+/** True while a clip in this voice is playing. */
+export function useSpeaking(voice?: Voice): boolean {
+  const v = useSyncExternalStore(
+    (cb) => {
+      listeners.add(cb);
+      return () => listeners.delete(cb);
+    },
+    () => speakingVoice,
+  );
+  return voice ? v === voice : v !== null;
+}
+
 let current: HTMLAudioElement | null = null;
 
 export function speak(text: string, voice: Voice = 'f', slow = false): Promise<void> {
   if (!hasAudio(text, voice)) return Promise.resolve();
   current?.pause();
-  const a = new Audio(audioUrl(text, voice));
-  a.playbackRate = slow ? 0.7 : 1;
-  a.preservesPitch = true;
+  // A real slow recording sounds natural; stretching the normal clip is only the fallback.
+  const slowFile = slow && available?.has(slowKey(text, voice));
+  const a = new Audio(slowFile ? `${BASE}${slowKey(text, voice)}.mp3` : audioUrl(text, voice));
+  if (slow && !slowFile) {
+    a.playbackRate = 0.75;
+    a.preservesPitch = true;
+  }
   current = a;
   return new Promise((resolve) => {
-    a.onended = () => resolve();
-    a.onerror = () => resolve();
-    a.play().catch(() => resolve());
+    const done = () => {
+      if (current === a) setSpeaking(null);
+      resolve();
+    };
+    a.onplay = () => setSpeaking(voice);
+    a.onended = done;
+    a.onerror = done;
+    a.onpause = done;
+    a.play().catch(done);
   });
 }
 

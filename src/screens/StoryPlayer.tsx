@@ -8,7 +8,7 @@ import { PASS, nodeById } from '../engine/course';
 import { useT } from '../i18n/ui';
 import { markStoryDone, useProgress, type Reward } from '../state/store';
 import { Avatar } from '../ui/Avatar';
-import { Bar, HintText, Modal, SpeakButton } from '../ui/bits';
+import { Bar, HintText, Modal, SpeakButton, Talk } from '../ui/bits';
 import { Close } from '../ui/icons';
 import { Mascot } from '../ui/Mascot';
 import { personal } from '../ui/personal';
@@ -92,7 +92,9 @@ export function StoryPlayer({ nodeId, nav, guard }: { nodeId: string; nav: Nav; 
         {steps.slice(0, shown).map((s, i) =>
           'line' in s ? (
             <div key={i} className={`story-line ${s.line.who === 'you' ? 'you' : ''}`}>
-              <Avatar who={s.line.who} size={52} />
+              <Talk voice={CHARACTERS[s.line.who].voice}>
+                <Avatar who={s.line.who} size={52} />
+              </Talk>
               <div className="grow">
                 <div className="muted" style={{ fontSize: 13, fontWeight: 800, textAlign: s.line.who === 'you' ? 'right' : 'left' }}>
                   {s.line.who === 'you' && p.profile.name ? p.profile.name : CHARACTERS[s.line.who].name[lang]}
