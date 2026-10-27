@@ -3,7 +3,7 @@ import type { Lang } from '../content/types';
 import { useT } from '../i18n/ui';
 import { update, useProgress } from '../state/store';
 import { Mascot } from '../ui/Mascot';
-import { Bar } from '../ui/bits';
+import { Bar, Modal } from '../ui/bits';
 import { Book, Speaker, Turtle } from '../ui/icons';
 import { sfx } from '../audio/sfx';
 
@@ -14,11 +14,30 @@ export const GOALS = [
   { xp: 50, key: 'goalIntense' },
 ] as const;
 
+/** Languages Bolo may teach from later. Each has its own name and "coming soon" in that language. */
+const SOON_LANGS = [
+  { code: 'ms', flag: '🇲🇾', name: 'Bahasa Melayu', soon: 'Akan datang' },
+  { code: 'hi', flag: '🇮🇳', name: 'हिन्दी', soon: 'जल्द आ रहा है' },
+  { code: 'ur', flag: '🇵🇰', name: 'اردو', soon: 'جلد آ رہا ہے' },
+  { code: 'ar', flag: '🇸🇦', name: 'العربية', soon: 'قريبًا' },
+  { code: 'es', flag: '🇪🇸', name: 'Español', soon: 'Próximamente' },
+  { code: 'fr', flag: '🇫🇷', name: 'Français', soon: 'Bientôt disponible' },
+  { code: 'de', flag: '🇩🇪', name: 'Deutsch', soon: 'Bald verfügbar' },
+  { code: 'it', flag: '🇮🇹', name: 'Italiano', soon: 'Prossimamente' },
+  { code: 'pt', flag: '🇵🇹', name: 'Português', soon: 'Em breve' },
+  { code: 'tr', flag: '🇹🇷', name: 'Türkçe', soon: 'Çok yakında' },
+  { code: 'ja', flag: '🇯🇵', name: '日本語', soon: '近日公開' },
+  { code: 'ko', flag: '🇰🇷', name: '한국어', soon: '곧 출시 예정' },
+  { code: 'zh', flag: '🇨🇳', name: '中文', soon: '即将推出' },
+  { code: 'fil', flag: '🇵🇭', name: 'Filipino', soon: 'Malapit na' },
+];
+
 export function Onboarding() {
   const p = useProgress();
   const t = useT();
   const [step, setStep] = useState(0);
   const [name, setName] = useState(p.profile.name);
+  const [soon, setSoon] = useState<(typeof SOON_LANGS)[number] | null>(null);
   const steps = 5;
 
   const next = () => {
@@ -60,6 +79,21 @@ export function Onboarding() {
                 <span className="flag">🇮🇩</span> Bahasa Indonesia
               </button>
             </div>
+            <section aria-labelledby="soon-title">
+              <h2 id="soon-title" className="soon-title">
+                {t('comingSoon')}
+              </h2>
+              <div className="soon-grid">
+                {SOON_LANGS.map((l) => (
+                  <button key={l.code} type="button" className="soon-lang" lang={l.code} onClick={() => setSoon(l)}>
+                    <span className="flag" aria-hidden="true">
+                      {l.flag}
+                    </span>
+                    <span dir="auto">{l.name}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
           </>
         )}
         {step === 2 && (
@@ -117,9 +151,27 @@ export function Onboarding() {
           </>
         )}
       </div>
-      <button type="button" className="btn full" onClick={next} disabled={step === 2 && !name.trim()}>
-        {step === steps - 1 ? t('obGo') : t('continue')}
-      </button>
+      <div className="onb-foot">
+        <button type="button" className="btn full" onClick={next} disabled={step === 2 && !name.trim()}>
+          {step === steps - 1 ? t('obGo') : t('continue')}
+        </button>
+      </div>
+      <Modal open={soon !== null} onClose={() => setSoon(null)} labelledBy="soon-sheet-title">
+        {soon && (
+          <div className="center stack">
+            <div className="bounce-in">
+              <Mascot mood="happy" size={100} />
+            </div>
+            <h2 id="soon-sheet-title" className="soon-sheet-title" lang={soon.code} dir="auto">
+              {soon.flag} {soon.soon}
+            </h2>
+            <p className="muted">{t('obSoonBody', { lang: soon.name })}</p>
+            <button type="button" className="btn full" autoFocus onClick={() => setSoon(null)}>
+              {t('obSoonBack')}
+            </button>
+          </div>
+        )}
+      </Modal>
     </main>
   );
 }
